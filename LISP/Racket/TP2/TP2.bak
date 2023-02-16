@@ -1,0 +1,460 @@
+;1. Exercice sur les ensembles
+
+
+;a-
+(define (1er_elementL1_dans_L2? L1 L2)
+  (cond ((null? L2)#f)
+        ((equal? (car L1) (car L2)) #t)
+        (#t (1er_elementL1_dans_L2? L1 (cdr L2)))))
+
+(define (union L1 L2)
+  (cond ((null? L2) L1)
+        ((not (1er_elementL1_dans_L2? L2 L1)) (append (union L1 (cdr L2)) (list (car L2))))
+        (#t (union L1 (cdr L2)))))
+  
+(union '(a b c d) '(b c d e)) 
+(union '(1 2 3) '(4 5 6 7))
+(union '(1 2 3 4 5) '(4 5 6 7))
+
+
+
+;b-
+(define (1er_elementL1_dans_L2? L1 L2)
+  (cond ((null? L2)#f)
+        ((equal? (car L1) (car L2)) #t)
+        (#t (1er_elementL1_dans_L2? L1 (cdr L2)))))
+
+(define (inter L1 L2)
+  (cond ((null? L1)'())
+        ((1er_elementL1_dans_L2? L1 L2) (cons (car L1) (inter (cdr L1) L2)))
+        (#t (inter (cdr L1) L2))))
+
+(inter '(a b c d) '(b c d e))
+(inter '(1 2 3) '(4 5 6 7))
+(inter '(1 2 3 4 5) '(4 5 6 7))
+
+#|tests sous-fonction
+(1er_elementL1_dans_L2? '(2 2) '(1 3))
+(1er_elementL1_dans_L2? '(2 2) '(1 3 2))
+(1er_elementL1_dans_L2? '(2 2) '(1 3 4 5 2))
+(1er_elementL1_dans_L2? '(1 2) '(3 4 5 2))
+|#
+
+
+;2.twice
+
+(define (twice L)
+  (map (lambda (L)
+         (* 2 L))
+       L))
+
+(twice '(1 2 3))
+(twice '(2 4 6))
+(twice '(5 2 3 4))
+
+;3. merge
+
+(define (produit L)
+  (if (null? L)
+      1
+      (* (car L) (produit (cdr L)))))
+      
+(define (merge L1 L2)
+  (produit (map (lambda (L1 L2)(+ L1 L2))
+       L1 L2)))
+
+(merge '(1 2 3) '(2 2 2))
+(merge '(1 1 1 1) '(1 1 1 2))
+(merge '(3 2) '(1 5))
+
+
+;4. Compare-liste
+
+(define (count x L)
+  (cond ((null? L) 0)
+        ((equal? x (car L)) (+ 1 (count x (cdr L))))
+        (#t (count x (cdr L)))))
+(count 'b '(a b c b d b e))
+(count 'a '(a b c b d b e))
+(count 'a '(d b e))
+
+(define (compare-liste L1 L2)
+  (count #t (map (lambda (L1 L2)(equal? L1 L2))
+       L1 L2)))
+
+(compare-liste '(a b c d) '(a d e f))
+(compare-liste '(a b c d) '(a c b d))
+(compare-liste '(a b c d) '(a b b d))
+
+
+
+
+;5. Count
+
+(define (count x L)
+  (cond ((null? L) 0)
+        ((equal? x (car L)) (+ 1 (count x (cdr L))))
+        (#t (count x (cdr L)))))
+
+(count 'b '(a b c b d b e))
+(count 'a '(a b c b d b e))
+(count 'a '(d b e))
+
+;6. Compt
+
+(define (Compt L)
+  (cond ((null? L) 0)
+        ((even? (car L)) (+ 1 (Compt (cdr L))))
+        (#t (Compt (cdr L)))))
+
+(Compt '(1 3 4 5 7 9))
+(Compt '(2 3 4 6 8))
+(Compt '(2 3 4 6))
+
+;7. Max-sous-liste
+
+;a-reccursive
+(define (Max-sous-liste1 L)
+  (cond ((= (length L) 1) (length (car L)))
+        ((< (length (cadr L))(length (car L)))(Max-sous-liste1 (cons (car L)(cddr L))))
+        (#t (Max-sous-liste1 (cdr L)))))
+
+(Max-sous-liste1  '( (t y u) (1 2 3 4)  (6 8)  (y) )) 
+(Max-sous-liste1  '( (6 8) (t y u) (1 2 3 4)))
+(Max-sous-liste1  '( (t y u) (6 8) ))
+(Max-sous-liste1  '((6)  (y) ))
+(Max-sous-liste1  '( (1 2 3 4 5 6 ) (6 8) (t y u)))
+
+;b-map et apply
+(define (Max-sous-liste2 L)
+  (apply max(map (lambda (L)
+                   (length L))
+                 L)))
+
+(Max-sous-liste2  '( (t y u) (1 2 3 4)  (6 8)  (y) )) 
+(Max-sous-liste2  '( (6 8) (t y u) (1 2 3 4)))
+(Max-sous-liste2  '( (t y u) (6 8) ))
+(Max-sous-liste2  '((6)  (y) ))
+(Max-sous-liste2  '( (1 2 3 4 5 6 ) (6 8) (t y u)))
+
+
+
+;8. NBDIST
+
+(define (count x L)
+  (cond ((null? L) 0)
+        ((equal? x (car L)) (+ 1 (count x (cdr L))))
+        (#t (count x (cdr L)))))
+
+(define (NBDIST L)
+  (cond ((null? L) 0)
+        ((= 1 (count (car L) L)) (+ 1 (NBDIST (cdr L))))
+        (#t (NBDIST (cdr L)))))
+
+(NBDIST '(a b c a d e b a a))
+(NBDIST '(1 3 4 5 5))
+
+;9.
+
+;a- Notre-append
+(define (Notre-append L1 L2)
+  (if (null? L1)
+      L2
+      (cons (car L1) (Notre-append (cdr L1) L2))))
+
+
+;b- VALIS
+(define (valis L)
+  (map (lambda (L)
+         (eval L))
+       L))
+(valis '((car '(1 2)) "oo" (* 4 5)))
+(valis '((caddr '(1 2 3 4)) (+ 1 4)))
+
+
+;10. Remove-first
+(define (count x L)
+  (cond ((null? L) 0)
+        ((equal? x (car L)) (+ 1 (count x (cdr L))))
+        (#t (count x (cdr L)))))
+
+(define (remove-first x L)
+  (cond ((= 0 (count x L)) L)
+        ((equal? x (car L))(cdr L))
+        (#t (cons (car L) (remove-first x (cdr L))))))
+
+(remove-first 'b '(a b c b d e))
+(remove-first 'e '(a b c b d e))
+(remove-first 'f '(a b c b d e))
+
+;11. Remove-all
+(define (count x L)
+  (cond ((null? L) 0)
+        ((equal? x (car L)) (+ 1 (count x (cdr L))))
+        (#t (count x (cdr L)))))
+
+(define (remove-all x L)
+  (cond ((= 0 (count x L)) L)
+        ((equal? x (car L))(remove-all x (cdr L)))
+        (#t (cons (car L) (remove-all x (cdr L))))))
+
+(remove-all 'b '(a b c b d e))
+(remove-all 'b '(a b c (b) d e)) 
+(remove-all 'e '(a b c b d e))
+(remove-all 'f '(a b c b d e))
+(remove-all 'f '(f b f f f e))
+
+
+;12. Remove-k-first
+(define (count x L)
+  (cond ((null? L) 0)
+        ((equal? x (car L)) (+ 1 (count x (cdr L))))
+        (#t (count x (cdr L)))))
+
+(define (remove-first x L)
+  (cond ((= 0 (count x L)) L)
+        ((equal? x (car L))(cdr L))
+        (#t (cons (car L) (remove-first x (cdr L))))))
+
+(define (remove-k-first x n L)
+  (if (= 0 n)
+      L
+      (remove-k-first x (- n 1) (remove-first x L))))
+      
+(remove-k-first  'a 1  '(1 2 a 3 4 a 5 6 a 7))
+(remove-k-first  'a 2  '(1 2 a 3 4 a 5 6 a 7))
+(remove-k-first  'a 3  '(1 2 a 3 4 a 5 6 a 7))
+(remove-k-first  'a 4  '(1 2 a 3 4 a 5 6 a 7))
+(remove-k-first  'b 2  '(1 2 a 3 b 4 a 5 b 6 b a 7))
+
+
+
+
+;13. Notre-reverse
+(define (reverse-bis L1 L2)
+  (if (null? L1)
+      L2
+      (reverse-bis (cdr L1) (cons (car L1) L2))))
+
+(define (Notre-reverse L1)
+  (reverse-bis L1 '()))
+
+
+
+
+;14. Alternate
+(define (alternate L)
+  (cond((null? L) '())
+       ((= 1 (length L)) L)
+       (#t (cons (cadr L) (cons (car L) (alternate (cddr L))))))) 
+
+(alternate '(a b c d e f))
+(alternate '(a b c d e f g))
+(alternate '(1 2 3 4 5 6 7 8 9 10))
+(alternate '(1 2 3 4 5 6 7 8 9 10 11)) 
+
+
+
+;15. Longest
+(define (longest L)
+  (cond ((= (length L) 1) (car L))
+        ((< (length (cadr L))(length (car L)))(longest (cons (car L)(cddr L))))
+        (#t (longest (cdr L)))))
+
+(longest  '((1 3) (a b c d) () (a b))) 
+(longest  '( (t y u) (1 2 3 4)  (6 8)  (y) )) 
+(longest  '( (6 8) (t y u) (1 2 3 4)))
+(longest  '( (t y u) (6 8) ))
+(longest  '( (1 2 3 4 5 6 ) (6 8) (t y u)))
+
+;16. Stammer-n
+(define (duplication x n)
+  (if (= n 0)
+      '()
+      (cons x (duplication x (- n 1)))))
+
+(define (sous-stammer-n L n)
+  (apply append (map (lambda (L)
+                      (duplication L n))
+                    L)))
+
+(sous-stammer-n  '(a b c d) 4)
+(sous-stammer-n  '(a b c d) 2)
+(sous-stammer-n  '(a b c d) 3)
+(sous-stammer-n  '(a b c) 5)
+
+#|tests sous-fonction
+(duplication 'a 3)
+(duplication 'b 2)
+(duplication 'c 5)
+|#
+
+;17. Listref
+(define (listref L n)
+  (if (= 0 n)
+      (car L)
+      (listref (cdr L) (- n 1))))
+
+(listref  '(a b c d e f) 0) 
+(listref  '(a b c d e f) 3)
+(listref  '(a b c d e f) 5)
+(listref  '(a b c d e f) 4)
+
+
+
+;18. List-Tail
+(define (list-tail2 L n)
+  (if (= 0 n)
+      L
+      (list-tail2 (cdr L) (- n 1))))
+
+(list-tail2   '(a b c d e) 0)
+(list-tail2   '(a b c d e f) 3)
+(list-tail2   '(a b c d e f) 2)
+
+;19. recherche de doublons
+(define (1er_elementL1_n-fois_dans_L2? L1 L2 n)
+  (cond ((= n 0) #t)
+        ((null? L2)#f)
+        ((equal? (car L1) (car L2)) (1er_elementL1_n-fois_dans_L2? L1 (cdr L2) (- n 1)))
+        (#t (1er_elementL1_n-fois_dans_L2? L1 (cdr L2) n))))
+
+(define (sous-doublon L1 L2)
+  (cond ((null? L1) '())
+        ((1er_elementL1_n-fois_dans_L2? L1 L2 2)(cons (car L1)(sous-doublon (cdr L1) L2))) 
+        (#t (sous-doublon (cdr L1) L2))))
+
+(define (doublon L1)
+  (sous-doublon L1 L1))
+
+(doublon '(a b b c))
+(doublon '(a b b c c))
+(doublon '(a b b a b d c e f c))
+
+(define poeme-pi '(Q U E J A I M E A F A I R E A P P R E N D R E U N N O M B R E U T I L E A U S A G E))
+(doublon poeme-pi)
+
+#|tests sous-fonction
+(1er_elementL1_n-fois_dans_L2? '(a b c) '(a a b a b c) 3)
+(1er_elementL1_n-fois_dans_L2? '(a b c) '(a a b a b c) 2)
+(1er_elementL1_n-fois_dans_L2? '(a b c) '(a a b a b c) 1)
+(1er_elementL1_n-fois_dans_L2? '(a b c) '(a a b a b c) 4)
+|#
+
+;20. Odds
+(define (odds L)
+  (cond ((null? L) '())
+        ((< 1 (length L))  (cons (car L) (odds(cddr L))))
+        (#t(cons (car L) (odds (cdr L))))))
+  
+
+(odds '(a b c d e f))  
+(odds '(a b c d e f g))
+(odds '(a b c d e f g h i ))
+(odds '(a b c d e f g h i j))
+
+;21. Follow
+(define (follow x L)
+  (cond ((null? L) '())
+        ((equal? x (car L))(if (< 1 (length L))
+                               (cons (cadr L) (follow x (cdr L)))
+                               '(())))
+        (#t(follow x (cdr L)))))
+  
+(follow 'b '(a b c b d e))
+(follow 'b '(a b c b d b))
+(follow 'b '(a b b d b e))
+(follow 'b '(a c f))
+(follow 'b '(a b b b b b))
+
+;22. Precede
+(define (follow x L)
+  (cond ((null? L) '())
+        ((equal? x (car L))(if (< 1 (length L))
+                               (cons (cadr L) (follow x (cdr L)))
+                               '(())))
+        (#t(follow x (cdr L)))))
+
+(define (precede x L)
+  (reverse(follow x (reverse L))))
+  
+(precede 'b '(a b c b d e))
+(precede 'b '(a b c b b d))
+(precede 'b '(b a c b d b))
+(precede 'c '(b a c b d b))
+(precede 'c '(c b a c b d b))
+
+;23. Collect-number
+(define (sous-collect-number L)
+  (cond ((null? L) '())
+        ((number? L) (list L))
+        ((null? (car L)) (sous-collect-number (cdr L)))
+        ((pair? (car L)) (append (sous-collect-number(car L))(sous-collect-number (cdr L))))
+        ((number? (car L)) (cons (car L) (sous-collect-number (cdr L))))
+        (#t (sous-collect-number (cdr L)))))
+
+(define (collect-number L)
+  (if (null? (sous-collect-number L))
+      (display"NIL\n")
+      (sous-collect-number L)))
+
+
+(collect-number 1)
+(collect-number '(a))
+(collect-number '(1 (b (2 c) ((3)))))
+(collect-number '(1 (b (2 c) ((3)d 4 (((5 a) (6)))))))
+
+
+;24. deep-map
+(define (deep-map f L)
+  (cond ((null? L) '())
+        ((pair? (car L)) (append (list (deep-map f (car L)))(deep-map f (cdr L))))
+        (#t (cons (f (car L)) (deep-map f (cdr L))))))
+
+(deep-map (lambda(x) (+ x 10) ) '(10 (3 100) 9 64))
+(deep-map (lambda(x) (+ x 10) ) '((10 (3) 100) 9 ((64))))
+(deep-map (lambda(x) (* x 10) ) '(10 (3 ((100))) (((((9))) 64))))
+
+
+;25. Permutation
+(define (sous-mille-feuille x L1 L2)
+  (if (null? L1)
+      (list (reverse (cons x (reverse L2))))
+      (cons (append L2 (cons x L1)) (sous-mille-feuille x (cdr L1) (reverse(cons (car L1) (reverse L2)))))))
+
+(define (mille-feuille x L)
+  (sous-mille-feuille x L '()))
+
+(define (map-mille-feuille x L)
+  (apply append (map (lambda (L)
+                       (mille-feuille x L))
+                     L)))
+
+(define (sous-permute-bis x L)
+  (cond ((null? L) (cons x '()))
+        ((= 1 (length L)) (mille-feuille x L))
+        (#t (map-mille-feuille x L))))
+
+(define (permute-bis L1 L2)
+  (if (null? L1)
+      L2
+      (permute-bis (cdr L1) (sous-permute-bis (car L1) L2))))
+  
+(define (permute L)
+  (if (= 1 (length L))
+      (list L)
+      (reverse (permute-bis L '()))))
+
+;(permute '(1 2 3 4))
+(permute '(1 2 3)) 
+(permute '(1 2))
+(permute '(1))
+
+#| tests sous-fonctions
+(mille-feuille '3 '(1 2))
+(mille-feuille '4 '(1 2 3))
+(mille-feuille '5 '(1 2 3 4))
+
+(map-mille-feuille '3 '((1 2)(2 1))
+(map-mille-feuille '4 '((1 2 3) '(3 2 1) '(1 3 2))
+|#

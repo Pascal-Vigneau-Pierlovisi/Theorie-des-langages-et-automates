@@ -1,0 +1,247 @@
+#lang racket/gui
+
+#| 1.Présentation du résultat d’un calcul :
+
+(define (fac n)
+  (if (= n 1)
+      1
+      (* n (fac (- n 1)))))
+
+(define FRAME
+  (new frame%
+       (label " Factorielle ")))
+
+(define VPANEL
+  (new vertical-panel%(parent FRAME)
+                    (alignment '(left center))))
+
+(define TEXT-FIELD
+  (new text-field%(parent VPANEL)
+       (label " valeur de n : ")
+       (min-width 140) ; largeur minimum
+       (init-value " 0 ") ; valeur initiale
+       (stretchable-width #f) ; non redimensionnable
+       (callback (lambda (obj evt)
+                   (when (equal? (send evt get-event-type) 'text-field-enter)
+                     (let ((n (string->number (send TEXT-FIELD get-value))))
+                       (send MSG set-label (format " Factorielle : ~a" (fac n)))))))))
+
+
+(define MSG
+  (new message% (parent VPANEL)
+       (label " Factorielle. : 1 ")
+       (min-width 500)))
+
+(define HPANEL
+  (new horizontal-panel% (parent VPANEL)
+       (alignment '(center center))))
+  
+(define BUTTON
+  (new button% (parent HPANEL)
+       (label " Random ")
+       (callback (lambda (obj evt) ; obj et evt non utilisés
+                   (let ([n (random 41)]) ; n compris entre 0 et 40
+                         (send TEXT-FIELD set-value (number->string n))
+                         (send MSG set-label (format " Factorielle : ~a" (fac n))))))))
+
+(send FRAME show #t)
+
+|#
+
+
+
+#| 2. Programmation d’un éditeur de texte
+
+(require (only-in mzlib/string read-from-string-all expr->string))
+
+(define FRAME
+  (let-values (((w h) (get-display-size)))
+    (new frame% (min-width (quotient w 3))
+         (label " éditeurs ")
+         (x (quotient w 3))
+         (y 30))))
+
+(define VPANEL
+  (new vertical-panel% (parent FRAME) (alignment '(center center))))
+
+
+(define TEXT1 (new text%))
+  
+(define ECANVAS1
+  (new editor-canvas% (parent VPANEL)
+       (min-height 200) (editor TEXT1)))
+  
+(define TEXT2 (new text%))
+  
+(define ECANVAS2
+  (new editor-canvas% (parent VPANEL)
+       (min-height 200) (editor TEXT2)))
+
+(define ns (make-base-namespace))
+  
+(eval '(require scheme) ns)
+
+(define BUTTON-EVAL
+  (new button% (parent VPANEL)
+       (label " Evaluer ")
+       (callback
+        (lambda(obj evt) ; obj est le bouton
+          (send TEXT2 erase)
+          (let ([L (read-from-string-all (send TEXT1 get-text))])
+            (map (lambda (expr)
+                   (send TEXT2 insert
+                         (expr->string (eval expr ns)))
+                   (send TEXT2 insert "\n"))L))))))
+            
+
+(send FRAME show #t)
+
+|#
+
+
+
+
+#| 3.Dessin dans une fenêtre graphique. 
+
+(define RED-PEN (make-object pen% "red" 3 'solid))
+(define BLACK-PEN (make-object pen% "black" 3 'solid))
+(define BLUE-PEN (make-object pen% "blue" 1 'solid))
+(define YELLOW-BRUSH (make-object brush% "yellow" 'solid))
+
+(define FRAME
+  (new frame% (label "Monte-Carlo")
+       (stretchable-width #f) (stretchable-height #f)))
+
+(define VPANEL (new vertical-panel% (parent FRAME)))
+
+(define TEXT-FIELD
+  (new text-field% (parent VPANEL)
+       (label "Nombre de points N =")
+       (init-value "5000")
+       (callback (lambda (obj evt)
+                   (when (equal? (send evt get-event-type)
+                                 'text-field-enter)
+                     (send CANVAS on-paint))))))
+
+(define MSG
+  (new message% (parent VPANEL)
+       (label " approximation =")
+       (min-width 500)))
+  
+
+(define CANVAS
+  (new canvas% (parent VPANEL)
+       (min-width 300) (min-height 300) (style '(border))
+       (paint-callback
+         (lambda (obj evt)
+           (let ((dc (send obj get-dc)))
+             (send dc clear)
+             (send dc set-pen BLUE-PEN)
+             (send dc set-brush YELLOW-BRUSH)
+             (send dc draw-ellipse 0 0 299 299)
+             (let ([s 0]
+                  [N (string->number (send TEXT-FIELD get-value))])
+             (do ((i 0 (+ i 1)))
+               ((= i N) (send MSG set-label
+                              (number->string (* 4.0 (/ s N)))))
+               (let ([x (random 300)] [y (random 300)])
+                 (if (< (+ (sqr (- x 150)) (sqr (- y 150))) (sqr 150))
+                     (begin (send dc set-pen RED-PEN) (set! s (+ s 1)))
+                     (send dc set-pen BLACK-PEN))
+                 (send dc draw-point x y)))))))))
+               
+
+(define BUTTON
+  (new button% (parent VPANEL) (label "Go !")
+       (callback (lambda (obj evt) (send CANVAS on-paint)))))
+
+
+(send FRAME show #t)
+
+|#
+
+
+
+(define valeur-gauge 0)
+(define t-cercle 0)
+(define pos-radio-box 0)
+
+(define frame
+  (new frame%
+       (label " More buttons... ")
+       (stretchable-width #f) (stretchable-height #f)))
+
+(define hpanel (new horizontal-panel%
+                    (parent frame)))
+
+(define left-panel (new vertical-panel%
+                    (parent hpanel)
+                    (style '(border))))
+
+(define right-panel (new panel%
+                    (parent hpanel)))
+
+(define CANVAS
+  (new canvas% (parent right-panel)
+       (min-width 400)
+       (min-height 400)
+       (style '(border))))
+
+(define dc (send CANVAS get-dc))
+
+(define BLACK-PEN (make-object pen% "black" 2 'solid))
+(define WHITE-PEN (make-object pen% "white" 0 'solid))
+(define WHITE-BRUSH (make-object brush% "white" 'solid))
+(define RED-BRUSH (make-object brush% "red" 'solid))
+(define BLUE-BRUSH (make-object brush% "blue" 'solid))
+(define BLACK-BRUSH (make-object brush% "black" 'solid))
+
+(define gauge (new gauge%
+                   (label "nbPoints")
+                   (parent left-panel)
+                   (range 14)))
+
+(define button-new (new button%
+                    (parent left-panel)
+                    (label "NEW")
+                    (callback (lambda (obj evt)
+                                (when (< valeur-gauge 14)
+                                  (begin (set! valeur-gauge (+ valeur-gauge 1))
+                                         (send gauge set-value valeur-gauge)
+                                         (send dc set-pen BLACK-PEN)
+                                         (set! pos-radio-box (send radio-box get-selection))
+                                         (cond((= pos-radio-box 0) (send dc set-brush WHITE-BRUSH))
+                                              ((= pos-radio-box 1) (send dc set-brush RED-BRUSH))
+                                              ((= pos-radio-box 2) (send dc set-brush BLUE-BRUSH))
+                                              (#t  (send dc set-brush BLACK-BRUSH)))
+                                         (set! t-cercle (* 4 (send slider get-value)))
+                                         (let ([x (random 380)] [y (random 380)])
+                                           (send dc draw-ellipse x y t-cercle t-cercle))))))))
+
+(define button-clear (new button%
+                    (parent left-panel)
+                    (label "CLEAR")
+                    (callback (lambda (obj evt)
+                                (set! valeur-gauge 0)
+                                (send gauge set-value valeur-gauge)
+                                (send dc set-pen WHITE-PEN)
+                                (send dc set-brush WHITE-BRUSH)
+                                (send dc draw-rectangle 0 0 400 400)))))
+
+(define radio-box (new radio-box%
+                       (label "Local color")
+                       (parent left-panel)
+                       (choices (list "white"
+                                      "red"
+                                      "blue"
+                                      "black"))))
+
+(define slider (new slider%
+                    (parent left-panel)
+                    (label "Point size")
+                    (max-value 30)
+                    (min-value 0)
+                    (init-value 15)
+                    (style '(vertical))))
+
+(send frame show #t)
